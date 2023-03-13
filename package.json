@@ -1,0 +1,26 @@
+{
+  "name": "vercelejs",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "devStart": "nodemon server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^8.2.0",
+    "ejs": "^3.1.8",
+    "env": "^0.0.2",
+    "express": "^4.16.4",
+    "mongodb": "^5.1.0",
+    "multer": "^1.4.4",
+    "nodemon": "^2.0.15"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@vercel/node": "^1.15.3"
+  }
+}
