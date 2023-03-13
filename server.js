@@ -1,55 +1,26 @@
+const express = require('express')
+const app = express()
+const { query } = require('express')
+const bodyParser = require('body-parser');
+
 const { connectToDb, getDb } = require('./db')
 const { ObjectId } = require('mongodb')
-
-
-var express = require('express')
-var cors = require('cors')
-const path = require('path')
-require('dotenv').config()
-const multer = require('multer')
-
-var app = express()
-
 
 // db connection
 let db
 connectToDb((err) => {
     if (!err) {
-        app.listen(process.env.PORT || 3000, () => {
+        app.listen(process.env.PORT || 2004, () => {
         })
         db = getDb()
     }
 })
 
-// const port = process.env.PORT || 3000
-// app.listen(port, function () {
-//     console.log('Your app is listening on port ' + port)
-// })
 
-app.use(express.json())
-app.use(cors())
-app.use(express.static(__dirname + '/public'))
-app.use(express.urlencoded({ extended: true }))
+// ejs setup
 app.set('view engine', 'ejs')
 
-app.get('/', (req, res) => {
-
-    let blogs = []
-    db.collection('blogs')
-        .find()
-        .sort({ _id: -1 })
-        .forEach(blog => blogs.push(blog))
-        .then(() => {
-
-            res.render(path.join(__dirname + '/views/index.ejs'), { articles: blogs })
-            // res.render('index', { articles: blogs })
-        })
-        .catch((err) => {
-            res.status(500).json({ error: 'could not get data' })
-        })
-
-    // res.render(path.join(__dirname + '/views/index.ejs'))
-})
+app.use(bodyParser.urlencoded({ extended: true }));
 
 // for deleting down
 app.post('/', (req, res) => {
@@ -70,39 +41,91 @@ app.post('/', (req, res) => {
 
 })
 
-// app.post('/api/fileanalyse', upload.single('upfile'), (req, res) => {
-//   const fileInfo = req.file
 
-//   res.json({
-//     name: fileInfo.originalname,
-//     type: fileInfo.mimetype,
-//     size: fileInfo.size,
-//   })
-// })
+app.use(bodyParser.urlencoded({ extended: true }));
+app.post('/article', (req, res) => {
+
+    let newBlog = req.body
+
+
+
+    db.collection('blogs')
+        .insertOne(newBlog)
+        .then(result => {
+
+
+            var stringID = req.body._id.toString()
+
+
+            res.redirect(`/article?v=${stringID}`)
+
+
+
+
+            res.status(200)
+
+        })
+        .catch(err => {
+            res.status(500)
+            res.send(`Error:${err}`)
+        })
+
+})
+
+
+
+
+
+
+
+app.use(bodyParser.urlencoded({ extended: true }));
+
+app.get('/article', (req, res) => {
+
+    db.collection('blogs')
+        .findOne({ _id: ObjectId(req.query.v) })
+        .then(result => {
+
+            if (result) {
+                res.render('article', { articles: result })
+            } else {
+
+                res.redirect('/')
+            }
+
+        })
+
+
+
+
+
+})
+
+
+app.get('/', (req, res) => {
+
+    let blogs = []
+    db.collection('blogs')
+        .find()
+        .sort({ _id: -1 })
+        .forEach(blog => blogs.push(blog))
+        .then(() => {
+
+            res.render('index', { articles: blogs })
+        })
+        .catch((err) => {
+            res.send(err)
+            // res.status(500).json({ error: 'could not get data' })
+        })
+
+})
 
 app.get('/new', (req, res) => {
     res.render('new')
-    // res.send("okayyyyyt")
 
 })
 
-
-app.get('/features', (req, res) => {
-    let updates = []
-    db.collection('updates')
-        .find()
-        .sort({ _id: -1 })
-        .forEach(blog => updates.push(blog))
-        .then(() => {
-
-            res.render('features', { updates: updates })
-        })
-        .catch((err) => {
-            res.status(500).json({ error: 'could not get data' })
-        })
-
-})
-
+app.use(bodyParser.urlencoded({ extended: true }));
 app.get('/edit', (req, res) => {
 
     let bh = req.query.id
@@ -149,55 +172,31 @@ app.post('/edit', (req, res) => {
         })
 })
 
-app.post('/article', (req, res) => {
 
-    let newBlog = req.body
+app.get('/features', (req, res) => {
+    let updates = []
+    db.collection('updates')
+        .find()
+        .sort({ _id: -1 })
+        .forEach(blog => updates.push(blog))
+        .then(() => {
 
-
-
-    db.collection('blogs')
-        .insertOne(newBlog)
-        .then(result => {
-
-
-            var stringID = req.body._id.toString()
-
-
-            res.redirect(`/article?v=${stringID}`)
-
-
-
-
-            res.status(200)
-
+            res.render('features', { updates: updates })
         })
-        .catch(err => {
-            res.status(500)
-            res.send(`Error:${err}`)
+        .catch((err) => {
+            res.status(500).json({ error: 'could not get data' })
         })
-
-})
-
-app.get('/article', (req, res) => {
-
-    db.collection('blogs')
-        .findOne({ _id: new ObjectId(req.query.v) })
-        .then(result => {
-
-            if (result) {
-                res.render('article', { articles: result })
-            } else {
-
-                res.redirect('/')
-            }
-
-        })
-
-
-
-
-
+ 
 })
 
 
-module.exports = app 
+
+
+
+
+
+
+
+
+
+
