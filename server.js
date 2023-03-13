@@ -1,5 +1,3 @@
-
-
 const { connectToDb, getDb } = require('./db');
 const { ObjectId } = require('mongodb');
 const express = require('express');
@@ -38,7 +36,7 @@ app.get('/', async (req, res) => {
             .sort({ _id: -1 })
             .toArray();
 
-        res.render(path.join(__dirname + '/views/index.ejs'), { articles: blogs });
+        res.render('index', { articles: blogs });
     } catch (err) {
         res.status(500).json({ error: 'could not get data' });
     }
@@ -46,8 +44,7 @@ app.get('/', async (req, res) => {
 
 app.post('/', async (req, res) => {
     try {
-        await db
-            .collection('blogs')
+        await db.collection('blogs')
             .deleteOne({ _id: ObjectId(req.query.id) });
         res.redirect('/');
     } catch (err) {
